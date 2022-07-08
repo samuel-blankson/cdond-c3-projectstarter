@@ -164,11 +164,11 @@ jobs:
           command: |
             apk add --update ansible 
             pip install awscli 
-            pip install -y tar gzip  
+            pip install tar gzip  
       - run:
           name: Configure server
           command: |
-            cd circleci/ansible
+            cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment    
 
