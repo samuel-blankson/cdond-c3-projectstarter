@@ -300,10 +300,10 @@ jobs:
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
                                 --query 'Reservations[*].Instances[*].PublicIpAddress' \
-                                --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" 
-                                )                  
+                                --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+                                --output text)                  
             export API_URL="http://${BACKEND_IP}:3030"
-            if curl --globoff "${API_URL}/api/status" | grep "ok"
+            if curl "${API_URL}/api/status" | grep "ok"
             then
                 return 0
             else
@@ -341,7 +341,26 @@ jobs:
                   --stack-name InitialStack \
                   --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
                   --tags project=udapeople
-      - destroy-environment             
+      - destroy-environment
+
+  cleanup:
+    docker:
+      # Docker image here
+    steps:
+      # Checkout code from git
+      - run:
+          name: Get old stack workflow id
+          command: |
+            # your code here
+            export OldWorkflowID="the id here"
+            export STACKS=[] #put the list of stacks here
+      - run:
+          name: Remove old stacks and files
+          command: |
+            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+            then
+              # your code here
+            fi                 
               
 
 workflows:
