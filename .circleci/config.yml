@@ -222,6 +222,8 @@ jobs:
                                 --filters "Name=tag:project,Values=udapeople")
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
       - run:
           name: Deploy frontend objects
           command: |
