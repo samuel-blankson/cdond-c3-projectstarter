@@ -170,6 +170,10 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook configure-server.yml -i inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/backend/.env      
       - destroy-environment 
 
   run-migrations:
@@ -177,10 +181,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            npm install awscli
+      - attach_workspace:
+          at: ~/
       - run:
           name: Run migrations
           command: |
@@ -194,6 +196,10 @@ jobs:
             then
                 curl https://kvdb.io/Ln2gBnCdRnioVxDEf8FkVT/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/backend      
       - destroy-environment  
 
   deploy-frontend:
