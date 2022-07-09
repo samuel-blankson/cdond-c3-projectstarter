@@ -38,7 +38,7 @@
   - name: Copy zipped artifat
     template:
       src: "tar -xvzf artifact.tar.gz"
-      dest: "~/web/index.js"
+      dest: "~/web"
 
   - name: Executing node
     shell: |

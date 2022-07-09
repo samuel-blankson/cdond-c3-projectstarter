@@ -211,8 +211,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl ansible nodejs npm openssh-client git awscli python3
-            yum install -y tar gzip
+            apk add --update curl ansible nodejs tar gzip npm openssh-client git awscli python3
       - attach_workspace:
           at: ~/      
       - run:
@@ -247,8 +246,8 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl ansible nodejs npm openssh-client git awscli python3
-            yum install -y tar gzip
+            apk add --update curl ansible tar gzip nodejs npm openssh-client git
+            pip install awscli
       - run:
           name: Deploy backend
           command: |
