@@ -303,7 +303,7 @@ jobs:
                                 --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" 
                                 )                  
             export API_URL="http://${BACKEND_IP}:3030"
-            if curl -g/--globoff "${API_URL}/api/status" | grep "ok"
+            if curl --globoff "${API_URL}/api/status" | grep "ok"
             then
                 return 0
             else
@@ -321,7 +321,27 @@ jobs:
             else
               return 1
             fi
-      - destroy-environment         
+      - destroy-environment 
+
+  cloudfront-update:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update curl ansible tar gzip nodejs npm openssh-client git
+            pip install awscli
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            aws cloudformation deploy \
+                  --template-file .circleci/files/cloudfront.yml \
+                  --stack-name InitialStack \
+                  --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+                  --tags project=udapeople
+      - destroy-environment             
               
 
 workflows:
@@ -348,5 +368,7 @@ workflows:
       - deploy-backend:
           requires: [run-migrations]  
       - smoke-test:
-          requires: [deploy-backend, deploy-frontend]             
+          requires: [deploy-backend, deploy-frontend] 
+      - cloudfront-update:
+          requires: [smoke-test]                
   
