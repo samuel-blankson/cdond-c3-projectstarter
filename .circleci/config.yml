@@ -144,11 +144,11 @@ jobs:
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:Project,Values=udacity" \
-              --output text >> ~/inventory.txt
+              --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
-            - inventory.txt
+            - project/.circleci/ansible/inventory.txt
       - destroy-environment
 
   configure-infrastructure:
@@ -168,8 +168,8 @@ jobs:
       - run:
           name: Configure server
           command: |
-            # cd .circleci/ansible
-            ansible-playbook -i inventory.txt configure-server.yml
+            cd .circleci/ansible
+            ansible-playbook configure-server.yml -i inventory.txt
       - destroy-environment    
 
 workflows:
