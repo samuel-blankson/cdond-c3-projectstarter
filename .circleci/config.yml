@@ -303,7 +303,7 @@ jobs:
                                 --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" 
                                 )                  
             export API_URL="http://${BACKEND_IP}:3030"
-            if curl "${API_URL}/api/status" | grep "ok"
+            if curl -g/--globoff "${API_URL}/api/status" | grep "ok"
             then
                 return 0
             else
