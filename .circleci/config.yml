@@ -155,6 +155,7 @@ jobs:
     docker:
       - image: python:3.7-alpine3.11
     steps:
+      - checkout
       - add_ssh_keys:
           fingerprints: ["04:c4:bc:22:4b:05:65:47:b3:2c:38:f7:37:2c:d8:3f"]
       - attach_workspace:
@@ -167,7 +168,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            cd project/.circleci/ansible
+            cd .circleci/ansible
             ansible-playbook configure-server.yml -i inventory.txt
       - destroy-environment    
 
