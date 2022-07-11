@@ -16,10 +16,7 @@ commands:
             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
 
   revert-migrations:
-    description: Revert the last migration
-    parameters:
-        workflow_id:
-            type: string      
+    description: Revert the last migration    
     steps:
       - run:
           name: Revert migrations
@@ -321,12 +318,12 @@ jobs:
             echo ${URL} 
             if curl -s ${URL} | grep "Welcome"
             then
-                # Change this to 0 after the job fails
               exit 1
             else
               exit 1
             fi
-      # - destroy-environment 
+      - destroy-environment
+      - revert-migrations
 
   cloudfront-update:
     docker:
