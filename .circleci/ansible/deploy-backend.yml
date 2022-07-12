@@ -38,6 +38,7 @@
        changed_when: false 
 
      - name: customize /etc/environment
+       become: true
        ansible.builtin.lineinfile:
         dest: "/etc/environment"
         state: present
