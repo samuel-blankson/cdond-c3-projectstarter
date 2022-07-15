@@ -15,6 +15,20 @@ commands:
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
 
+
+  delete-s3-bucket:
+    description: Destroy the S3 bucket of the frontend given a workflow ID.
+    parameters:
+      when_to_run:
+        type: string
+        default: "on_fail"   
+    steps:
+      - run:
+          name: Destroy S3 bucket
+          when: << parameters.when_to_run >>
+          command: |
+            aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --force         
+
   revert-migrations:
     description: Revert the last migration    
     steps:
@@ -167,6 +181,7 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
+      - delete-s3-bucket
 
   configure-infrastructure:
     docker:
@@ -191,7 +206,8 @@ jobs:
           root: ~/
           paths:
             - project/backend     
-      - destroy-environment 
+      - destroy-environment
+      - delete-s3-bucket 
 
   run-migrations:
     docker:
@@ -218,7 +234,8 @@ jobs:
           root: ~/
           paths:
             - project/backend      
-      - destroy-environment  
+      - destroy-environment
+      - delete-s3-bucket  
 
   deploy-frontend:
     docker:
@@ -237,7 +254,7 @@ jobs:
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
                                 --query 'Reservations[*].Instances[*].PublicIpAddress' \
-                                --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+                                --filters "Name=tag:project,Values=udapeople" \
                                 --output text
                                 )
             export API_URL="http://${BACKEND_IP}:3030"
@@ -252,7 +269,8 @@ jobs:
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-      - destroy-environment 
+      - destroy-environment
+      - delete-s3-bucket 
 
   deploy-backend:
     docker:
@@ -285,7 +303,8 @@ jobs:
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
-      - destroy-environment 
+      - destroy-environment
+      - delete-s3-bucket 
 
   smoke-test:
     docker:
@@ -302,7 +321,7 @@ jobs:
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
                                 --query 'Reservations[*].Instances[*].PublicIpAddress' \
-                                --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+                                --filters "Name=tag:project,Values=udapeople" \
                                 --output text)                  
             export API_URL="http://${BACKEND_IP}:3030"
             if curl "${API_URL}/api/status" | grep "ok"
@@ -318,12 +337,13 @@ jobs:
             echo ${URL} 
             if curl -s ${URL} | grep "Welcome"
             then
-              exit 0
+              exit 1
             else
               exit 1
             fi
       - destroy-environment
       - revert-migrations
+      - delete-s3-bucket
 
   cloudfront-update:
     docker:
@@ -344,7 +364,8 @@ jobs:
                   --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
                   --tags project=udapeople
       - destroy-environment
-      - revert-migrations  
+      - revert-migrations
+      - delete-s3-bucket  
 
   cleanup:
     docker:
